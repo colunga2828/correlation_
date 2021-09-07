@@ -1,0 +1,51 @@
+#Set directory
+setwd("C:/Correlation project/Dataset")
+
+#Load libraries
+library(tidyverse)
+library(corrplot)
+
+#Read csv files
+Variables<-read.csv("Variables.csv",row.names = NULL)
+
+#Clean columns
+Variables <- Variables %>% select(-c( ï..Id))
+
+corr_simple <- function(data=Variables_COR,sig=0.7){
+  
+  #Create correlation
+  Variables_COR <-cor(Variables, method = "pearson")
+  round(Variables_COR, digits = 2)
+  
+  #Drop duplicates and correlations of 1 
+  Variables_COR[lower.tri(Variables_COR,diag=TRUE)] <- NA
+  
+  #Drop=1 correlations
+  Variables_COR[Variables_COR == 1] <- NA
+  
+  #Turn into a column table
+  Variables_COR <- as.data.frame(as.table(Variables_COR))
+  
+  #Remove the NA values  
+  Variables_COR <- na.omit(Variables_COR)
+  
+  #Select significant values  
+  Variables_COR <- subset(Variables_COR, abs(Freq) > sig)
+  
+  #Sort by highest correlation
+  Variables_COR <- Variables_COR[order(-abs(Variables_COR$Freq)),] 
+  
+  #Print table and export csv file
+  Variables_COR <-filter(Variables_COR,Freq>0)
+  print(Variables_COR)
+  write.csv(Variables_COR,file="Variables_COR.csv",row.names = FALSE) 
+  
+  #Turn corr back into matrix in order to plot with corrplot
+  mtx_corr <- reshape2::acast(Variables_COR, Var1~Var2, value.var="Freq")
+  
+  #Plot correlations
+  corrplot(mtx_corr, is.corr=FALSE, tl.col="black", na.label=" ")
+  
+}
+
+corr_simple(data=NL_COR,sig=0.7)
