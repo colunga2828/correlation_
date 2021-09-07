@@ -48,4 +48,4 @@ corr_simple <- function(data=Variables_COR,sig=0.7){
   
 }
 
-corr_simple(data=NL_COR,sig=0.7)
+corr_simple(data=Variables_COR,sig=0.7)
